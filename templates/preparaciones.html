@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparaciones en espera | AMP Chocolate</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+            background: #f7f4f0;
+            color: #38271f;
+        }
+        .panel {
+            background: white;
+            padding: 24px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+        .campos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        input, select, button {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d6ccc5;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+        button {
+            margin-top: 18px;
+            background: #583a2c;
+            color: white;
+            cursor: pointer;
+        }
+        .mensaje { padding: 12px; border-radius: 7px; }
+        .error { background: #ffe5e5; color: #8a2020; }
+        .exito { background: #e2f5e7; color: #205b30; }
+        .tabla { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee5df;
+        }
+        th { background: #f1e9e2; }
+        .vencida { color: #b42318; font-weight: bold; }
+        .disponible { color: #24733a; font-weight: bold; }
+        a { color: #583a2c; }
+    </style>
+</head>
+<body>
+
+    <a href="{{ url_for('inicio') }}">← Volver al inicio</a>
+
+    <h1>Preparaciones en espera</h1>
+    <p>Control de elaboraciones disponibles, cantidades y fechas límite de uso.</p>
+
+    <section class="panel">
+        <h2>Registrar preparación</h2>
+
+        {% if error %}
+            <p class="mensaje error">{{ error }}</p>
+        {% endif %}
+
+        {% if exito %}
+            <p class="mensaje exito">{{ exito }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <input type="hidden" name="accion" value="registrar">
+            <div class="campos">
+                <div>
+                    <label for="nombre">Nombre de la preparación</label>
+                    <input id="nombre" name="nombre" type="text"
+                           placeholder="Ej. Ganache de chocolate" required>
+                </div>
+
+                <div>
+                    <label for="cantidad">Cantidad elaborada</label>
+                    <input id="cantidad" name="cantidad" type="number"
+                           min="0.01" step="any" placeholder="Ej. 1000" required>
+                </div>
+
+                <div>
+                    <label for="unidad">Unidad</label>
+                    <select id="unidad" name="unidad" required>
+                        <option value="g">Gramos (g)</option>
+                        <option value="ml">Mililitros (ml)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="fecha_elaboracion">Fecha de elaboración</label>
+                    <input id="fecha_elaboracion" name="fecha_elaboracion"
+                           type="date" value="{{ hoy }}" required>
+                </div>
+
+                <div>
+                    <label for="fecha_limite">Fecha límite de uso</label>
+                    <input id="fecha_limite" name="fecha_limite"
+                           type="date" min="{{ hoy }}" required>
+                </div>
+            </div>
+
+            <button type="submit">Registrar preparación</button>
+        </form>
+    </section>
+    
+<section class="panel">
+    <h2>Registrar consumo</h2>
+    <p>Indica qué preparación utilizaste y qué cantidad consumiste.</p>
+
+    {% set disponibles = preparaciones
+        | selectattr("estado", "equalto", "Disponible") | list %}
+
+    {% if disponibles %}
+        <form method="POST">
+            <input type="hidden" name="accion" value="consumir">
+
+            <div class="campos">
+                <div>
+                    <label for="preparacion_id">Preparación</label>
+                    <select id="preparacion_id" name="preparacion_id" required>
+                        {% for p in disponibles %}
+                            <option value="{{ p.id }}">
+                                {{ p.nombre }} — {{ "%.2f"|format(p.cantidad) }} {{ p.unidad }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="cantidad_consumida">Cantidad utilizada</label>
+                    <input id="cantidad_consumida"
+                           name="cantidad_consumida"
+                           type="number" min="0.01" step="any"
+                           placeholder="Ej. 300" required>
+                </div>
+
+                <div>
+                    <label for="motivo">Motivo</label>
+                    <select id="motivo" name="motivo" required>
+                        <option value="Producción">Uso en producción</option>
+                        <option value="Deterioro">Deterioro</option>
+                        <option value="Vencimiento">Vencimiento</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit">Registrar consumo</button>
+        </form>
+    {% else %}
+        <p>No hay preparaciones disponibles para consumir.</p>
+    {% endif %}
+</section>
+
+
+    <section class="panel">
+        <h2>Preparaciones registradas</h2>
+
+        {% if preparaciones %}
+            <div class="tabla">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preparación</th>
+                            <th>Cantidad disponible</th>
+                            <th>Elaboración</th>
+                            <th>Fecha límite</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in preparaciones %}
+                            <tr>
+                                <td>{{ p.nombre }}</td>
+                                <td>{{ "%.2f"|format(p.cantidad) }} {{ p.unidad }}</td>
+                                <td>{{ p.fecha_elaboracion }}</td>
+                                <td>{{ p.fecha_limite }}</td>
+                                <td>
+                                    {% if p.estado != "Disponible" %}
+                                        <span>{{ p.estado }}</span>
+                                    {% elif p.fecha_limite < hoy %}
+                                        <span class="vencida">Vencida</span>
+                                    {% else %}
+                                        <span class="disponible">Disponible</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Todavía no hay preparaciones registradas.</p>
+        {% endif %}
+    </section>
+
+</body>
+</html>

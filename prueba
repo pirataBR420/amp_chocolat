@@ -1,0 +1,7 @@
+print("¡AMP Chocolate está en marcha!")
+
+ingrediente = "Chocolate"
+cantidad = 5
+
+print("Ingrediente:", ingrediente)
+print("Cantidad:", cantidad, "kg")

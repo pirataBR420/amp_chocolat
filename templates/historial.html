@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial | AMP Chocolate</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 20px;
+            font-family: Arial, sans-serif;
+            background: #fffaf7;
+            color: #46342e;
+        }
+
+        main {
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        .volver {
+            color: #bd6c6c;
+            text-decoration: none;
+        }
+
+        h1 {
+            color: #583a36;
+            margin-bottom: 8px;
+        }
+
+        .panel {
+            background: white;
+            padding: 22px;
+            margin: 22px 0;
+            border-radius: 14px;
+            border: 1px solid #f0e4de;
+            box-shadow: 0 3px 12px #0000000c;
+        }
+
+        .filtros {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #dfcec5;
+            border-radius: 7px;
+            width: 100%;
+        }
+
+        button {
+            background: #d98282;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #bd6c6c;
+        }
+
+        .limpiar {
+            color: #bd6c6c;
+            margin-left: 12px;
+        }
+
+        .tabla {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #eee5df;
+        }
+
+        th {
+            background: #f7eee9;
+            color: #583a36;
+        }
+
+        .entrada {
+            color: #267344;
+            font-weight: bold;
+        }
+
+        .salida {
+            color: #b33c3c;
+            font-weight: bold;
+        }
+
+        .consumo {
+            color: #a56b28;
+            font-weight: bold;
+        }
+
+        .vacio {
+            color: #87766e;
+            text-align: center;
+            padding: 25px;
+        }
+
+        @media (max-width: 700px) {
+            .filtros {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main>
+
+    <a class="volver" href="{{ url_for('inicio') }}">
+        ← Volver al inicio
+    </a>
+
+    <h1>Historial de movimientos</h1>
+    <p>Consulta todos los movimientos registrados en AMP Chocolate.</p>
+
+    <section class="panel">
+
+        <h2>Filtrar movimientos</h2>
+
+        <form method="GET" action="{{ url_for('historial') }}">
+
+            <div class="filtros">
+
+                <div class="campo">
+                    <label>Desde</label>
+                    <input type="date" name="fecha_desde"
+                           value="{{ fecha_desde }}">
+                </div>
+
+                <div class="campo">
+                    <label>Hasta</label>
+                    <input type="date" name="fecha_hasta"
+                           value="{{ fecha_hasta }}">
+                </div>
+
+                <div class="campo">
+                    <label>Tipo de movimiento</label>
+                    <select name="tipo">
+                        <option value="">Todos</option>
+                        <option value="Entrada"
+                            {% if tipo == "Entrada" %}selected{% endif %}>
+                            Entrada
+                        </option>
+                        <option value="Salida"
+                            {% if tipo == "Salida" %}selected{% endif %}>
+                            Salida
+                        </option>
+                        <option value="Consumo de preparación"
+                            {% if tipo == "Consumo de preparación" %}selected{% endif %}>
+                            Consumo de preparación
+                        </option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Ingrediente o preparación</label>
+                    <input type="text" name="producto"
+                           value="{{ producto }}"
+                           placeholder="Buscar producto">
+                </div>
+
+                <div class="campo">
+                    <label>Motivo</label>
+                    <input type="text" name="motivo"
+                           value="{{ motivo }}"
+                           placeholder="Buscar motivo">
+                </div>
+
+            </div>
+
+            <p>
+                <button type="submit">Buscar movimientos</button>
+                <a class="limpiar" href="{{ url_for('historial') }}">
+                    Limpiar filtros
+                </a>
+            </p>
+
+        </form>
+
+    </section>
+
+    <section class="panel">
+
+        <h2>Registros encontrados: {{ movimientos|length }}</h2>
+
+        <div class="tabla">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for m in movimientos %}
+                    <tr>
+                        <td>{{ m.fecha }}</td>
+
+                        <td>
+                            {% if m.tipo == "Entrada" %}
+                                <span class="entrada">{{ m.tipo }}</span>
+                            {% elif m.tipo == "Salida" %}
+                                <span class="salida">{{ m.tipo }}</span>
+                            {% else %}
+                                <span class="consumo">{{ m.tipo }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ m.producto }}</td>
+
+                        <td>{{ "%.2f"|format(m.cantidad) }} {{ m.unidad }}</td>
+
+                        <td>{{ m.motivo }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="vacio">
+                            No se encontraron movimientos.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

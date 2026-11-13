@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMP Chocolate | Almacenamiento</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fffaf7;
+            color: #46342e;
+        }
+
+        header {
+            background: #e9a18b;
+            color: white;
+            padding: 24px 7%;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            margin: 18px 0;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .boton {
+            display: inline-block;
+            background: #d98268;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+
+        .volver {
+            color: #9d5e49;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Almacenamiento</h1>
+        <p>Consulta los productos registrados en AMP Chocolate.</p>
+    </header>
+
+    <main>
+    
+        <section class="tarjeta">
+            <h2>Materias primas</h2>
+            <a href="{{ url_for('inicio') }}">← Volver al inicio</a>
+
+            <p>Harina, azúcar, chocolate, huevos, lácteos y otros ingredientes.</p>
+            <a class="boton" href="{{ url_for('materias_primas') }}">
+                Ver materias primas
+            </a>
+        </section>
+
+        <section class="tarjeta">
+            <h2>Preparaciones elaboradas</h2>
+            <p>Ganaches, rellenos, salsas y otras preparaciones disponibles para utilizar.</p>
+            <a class="boton" href="{{ url_for('preparaciones_espera') }}">
+                Ver preparaciones en espera
+            </a>
+        </section>
+    </main>
+</body>
+</html>

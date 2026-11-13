@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas | AMP Chocolate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+            background: #f7f4f0;
+            color: #38271f;
+        }
+        .panel {
+            background: white;
+            padding: 22px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+        .tabla { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 550px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee5df;
+        }
+        th { background: #f1e9e2; }
+        input, button {
+            padding: 9px;
+            border: 1px solid #d6ccc5;
+            border-radius: 6px;
+        }
+        button {
+            background: #583a2c;
+            color: white;
+            cursor: pointer;
+        }
+        .configuracion {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .configuracion input { width: 90px; }
+        .alerta {
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 12px;
+        }
+        .roja { background: #ffe5e5; color: #922b21; }
+        .amarilla { background: #fff1cc; color: #805500; }
+        .verde { background: #e2f5e7; color: #205b30; }
+        a { color: #583a2c; }
+        .vacio { color: #777; }
+    </style>
+</head>
+<body>
+
+    <a href="{{ url_for('inicio') }}">← Volver al inicio</a>
+
+    <h1>Alertas de inventario</h1>
+    <p>Control de existencias bajas y fechas de vencimiento.</p>
+
+    {% if exito %}
+        <p class="alerta verde">{{ exito }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p class="alerta roja">{{ error }}</p>
+    {% endif %}
+
+    <section class="panel">
+        <h2>Existencias bajas</h2>
+
+        {% if ingredientes_bajos %}
+            {% for i in ingredientes_bajos %}
+                <div class="alerta roja">
+                    <strong>{{ i.nombre }}</strong>:
+                    quedan {{ "%.2f"|format(i.cantidad) }} {{ i.unidad }}.
+                    Mínimo establecido:
+                    {{ "%.2f"|format(i.minimo) }} {{ i.unidad }}.
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="vacio">No hay ingredientes por debajo de su mínimo establecido.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Configurar mínimos por ingrediente</h2>
+        <p>Define la cantidad mínima que deseas mantener de cada materia prima. Usa la misma unidad del ingrediente.</p>
+
+        {% if ingredientes %}
+            <div class="tabla">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Existencia actual</th>
+                            <th>Mínimo de alerta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in ingredientes %}
+                            <tr>
+                                <td>{{ i.nombre }}</td>
+                                <td>{{ "%.2f"|format(i.cantidad) }} {{ i.unidad }}</td>
+                                <td>
+                                    <form class="configuracion"
+                                          method="POST"
+                                          action="{{ url_for('actualizar_minimo') }}">
+                                        <input type="hidden"
+                                               name="ingrediente_id"
+                                               value="{{ i.id }}">
+                                        <input type="number"
+                                               name="minimo"
+                                               min="0"
+                                               step="any"
+                                               value="{{ i.minimo }}"
+                                               required>
+                                        <span>{{ i.unidad }}</span>
+                                        <button type="submit">Guardar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="vacio">Todavía no hay materias primas registradas.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Preparaciones vencidas</h2>
+
+        {% if preparaciones_vencidas %}
+            {% for p in preparaciones_vencidas %}
+                <div class="alerta roja">
+                    <strong>{{ p.nombre }}</strong>:
+                    {{ "%.2f"|format(p.cantidad) }} {{ p.unidad }}.
+                    Venció el {{ p.fecha_limite }}.
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="vacio">No hay preparaciones vencidas.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Preparaciones próximas a vencer</h2>
+        <p>Preparaciones cuya fecha límite de uso está dentro de los próximos 7 días.</p>
+
+        {% if preparaciones_por_vencer %}
+            {% for p in preparaciones_por_vencer %}
+                <div class="alerta amarilla">
+                    <strong>{{ p.nombre }}</strong>:
+                    {{ "%.2f"|format(p.cantidad) }} {{ p.unidad }}.
+                    Fecha límite: {{ p.fecha_limite }}.
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="vacio">No hay preparaciones próximas a vencer.</p>
+        {% endif %}
+    </section>
+
+</body>
+</html>

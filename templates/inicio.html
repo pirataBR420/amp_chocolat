@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMP Chocolate | Inicio</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fffaf7;
+            color: #46342e;
+            position: relative;
+            isolation: isolate;
+            min-height: 100vh;
+        }
+
+        /* Logo difuminado de fondo */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("{{ url_for('static', filename='amp_logo.png') }}");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: min(650px, 85vw);
+            opacity: 0.055;
+            filter: blur(3px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        header {
+            background: rgba(255, 250, 247, 0.95);
+            padding: 20px 7%;
+            border-bottom: 2px solid #e9a18b;
+            box-shadow: 0 3px 12px #00000008;
+        }
+
+        .marca {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo {
+            width: 190px;
+            max-width: 45%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .encabezado-texto {
+            border-left: 1px solid #e9a18b;
+            padding-left: 22px;
+        }
+
+        .encabezado-texto h1 {
+            font-family: Georgia, serif;
+            color: #583a36;
+            font-size: 25px;
+            margin: 0 0 7px;
+        }
+
+        .encabezado-texto p {
+            color: #92736a;
+            margin: 0;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 0 20px 40px;
+        }
+
+        .bienvenida {
+            margin-bottom: 28px;
+        }
+
+        .bienvenida h2 {
+            color: #583a36;
+            margin-bottom: 8px;
+        }
+
+        .bienvenida p {
+            color: #79665e;
+        }
+
+        .resumen {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .tarjeta, .modulo {
+            background: rgba(255, 255, 255, 0.94);
+            padding: 24px;
+            border-radius: 14px;
+            border: 1px solid #f0e4de;
+            box-shadow: 0 4px 15px #0000000c;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tarjeta:hover, .modulo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 18px #00000012;
+        }
+
+        .numero {
+            font-size: 30px;
+            font-weight: bold;
+            color: #c87570;
+            margin: 12px 0 0;
+        }
+
+        .modulos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .modulo h3 {
+            margin-top: 0;
+            color: #583a36;
+        }
+
+        .modulo p {
+            color: #79665e;
+            line-height: 1.5;
+            min-height: 45px;
+        }
+
+        a.boton {
+            display: inline-block;
+            background: #d98282;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        a.boton:hover {
+            background: #bd6c6c;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #9b8177;
+            font-size: 13px;
+        }
+
+        @media (max-width: 650px) {
+            .resumen, .modulos {
+                grid-template-columns: 1fr;
+            }
+
+            .marca {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .logo {
+                width: 165px;
+                max-width: 75%;
+            }
+
+            .encabezado-texto {
+                border-left: none;
+                border-top: 1px solid #e9a18b;
+                padding: 12px 0 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="marca">
+            <img
+                src="{{ url_for('static', filename='amp_logo.png') }}"
+                alt="AMP Pastelería y Café"
+                class="logo"
+            >
+
+            <div class="encabezado-texto">
+                <h1>Sistema de inventario</h1>
+                <p>Administración y control de AMP Chocolate</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <section class="bienvenida">
+            <h2>Panel principal</h2>
+            <p>Bienvenido. ¿Qué deseas administrar hoy?</p>
+        </section>
+
+        <section class="resumen">
+
+            <div class="tarjeta">
+                <div>Materias primas registradas</div>
+                <p class="numero">{{ total_ingredientes }}</p>
+            </div>
+
+            <div class="tarjeta">
+                <div>Preparaciones disponibles</div>
+                <p class="numero">{{ total_preparaciones }}</p>
+            </div>
+
+        </section>
+
+        <section class="modulos">
+
+            <div class="modulo">
+                <h3>Almacenamiento</h3>
+                <p>Consulta las materias primas y las preparaciones elaboradas.</p>
+                <a class="boton" href="{{ url_for('almacenamiento') }}">
+                    Abrir almacenamiento
+                </a>
+            </div>
+
+            <div class="modulo">
+                <h3>Entradas y salidas</h3>
+                <p>Gestiona los movimientos de productos y materias primas.</p>
+                <a class="boton" href="{{ url_for('movimientos') }}">
+                    Ver movimientos
+                </a>
+            </div>
+
+            <div class="modulo">
+                <h3>Preparaciones en espera</h3>
+                <p>Controla los sobrantes aprovechables de las elaboraciones.</p>
+                <a class="boton" href="{{ url_for('preparaciones_espera') }}">
+                    Ver preparaciones
+                </a>
+            </div>
+
+            <div class="modulo">
+                <h3>Alertas</h3>
+                <p>Consulta las existencias bajas y los vencimientos.</p>
+                <a class="boton" href="{{ url_for('alertas') }}">
+                    Consultar alertas
+                </a>
+            </div>
+<div class="modulo">
+    <h3>Historial y reportes</h3>
+    <p>Consulta las entradas, salidas y consumos registrados en el inventario.</p>
+    <a class="boton" href="{{ url_for('historial') }}">
+        Ver historial
+    </a>
+</div>
+        </section>
+
+    </main>
+
+    <footer>
+        AMP Chocolate · Sistema de control de inventario
+    </footer>
+
+</body>
+</html>

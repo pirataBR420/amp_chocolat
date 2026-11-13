@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMP Chocolate | Movimientos</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fffaf7;
+            color: #46342e;
+        }
+
+        header {
+            background: #e9a18b;
+            color: white;
+            padding: 24px 7%;
+        }
+
+        main {
+            max-width: 1050px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .tarjeta {
+            background: white;
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .formulario {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5d5ce;
+            border-radius: 8px;
+            background: white;
+            color: #46342e;
+        }
+
+        .boton {
+            background: #d98268;
+            color: white;
+            padding: 12px 18px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .mensaje {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            background: #e4f4e9;
+            color: #245d39;
+        }
+
+        .error {
+            background: #fbe5e1;
+            color: #8a3024;
+        }
+
+        .tabla-contenedor { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f0e5e0;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #936657;
+            font-size: 13px;
+        }
+
+        .volver { color: #9d5e49; }
+
+        @media (max-width: 650px) {
+            .formulario { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Entradas y salidas</h1>
+        <p>AMP Chocolate · Control de movimientos</p>
+    </header>
+
+    <main>
+        <p>
+            <a class="volver" href="{{ url_for('inicio') }}">
+                ← Volver al inicio
+            </a>
+        </p>
+
+        <section class="tarjeta">
+            <h2>Registrar movimiento</h2>
+
+            {% if error %}
+                <div class="mensaje error">{{ error }}</div>
+            {% endif %}
+
+            {% if exito %}
+                <div class="mensaje">{{ exito }}</div>
+            {% endif %}
+
+            {% if ingredientes %}
+            <form method="POST" class="formulario">
+
+                <div>
+                    <label for="tipo">Tipo de movimiento</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="Entrada">Entrada</option>
+                        <option value="Salida">Salida</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="ingrediente_id">Ingrediente</label>
+                    <select id="ingrediente_id" name="ingrediente_id" required>
+                        {% for ingrediente in ingredientes %}
+                        <option value="{{ ingrediente['id'] }}">
+                            {{ ingrediente['nombre'] }}
+                            ({{ ingrediente['cantidad'] }} {{ ingrediente['unidad'] }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="cantidad">Cantidad (g o ml)</label>
+                    <input
+                        type="number"
+                        id="cantidad"
+                        name="cantidad"
+                        min="0.001"
+                        max="1000000000"
+                        step="any"
+                        placeholder="Ej. 250"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="motivo">Motivo</label>
+                    <select id="motivo" name="motivo" required>
+                        <option value="Compra">Compra o recepción</option>
+                        <option value="Producción">Uso en producción</option>
+                        <option value="Vencimiento">Vencimiento</option>
+                        <option value="Deterioro">Deterioro</option>
+                        <option value="Derrame">Derrame</option>
+                        <option value="Rotura">Rotura</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button class="boton" type="submit">
+                        Registrar movimiento
+                    </button>
+                </div>
+            </form>
+            {% else %}
+                <p>
+                    Primero debes registrar materias primas en el inventario.
+                </p>
+                <a href="{{ url_for('materias_primas') }}">
+                    Ir a materias primas
+                </a>
+            {% endif %}
+        </section>
+
+        <section class="tarjeta">
+            <h2>Historial de movimientos</h2>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for movimiento in historial %}
+                        <tr>
+                            <td>{{ movimiento['fecha'] }}</td>
+                            <td>{{ movimiento['tipo'] }}</td>
+                            <td>{{ movimiento['producto'] }}</td>
+                            <td>{{ movimiento['cantidad'] }}</td>
+                            <td>{{ movimiento['unidad'] }}</td>
+                            <td>{{ movimiento['motivo'] }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6">
+                                Todavía no hay movimientos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
